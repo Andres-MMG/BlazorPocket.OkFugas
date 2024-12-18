@@ -1,0 +1,66 @@
+﻿@using PocketBaseClient.BlazorPocket.Models
+@using static BlazorPocket.Shared.Dto.ProductDto
+@using static PocketBaseClient.BlazorPocket.Models.Product
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="@Model" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <MudGrid Spacing="3">
+                <MudItem xs="6">
+                    <MudTextField Label="@Model.GetDisplayName(x=>x.Name)"
+                                  @bind-Value="Model.Name" For="@(() => Model.Name)" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="@Model.GetDisplayName(x=>x.Spec)"
+                                  @bind-Value="Model.Spec" For="@(() => Model.Spec)" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="@Model.GetDisplayName(x=>x.Description)"
+                                  @bind-Value="Model.Description" For="@(() => Model.Description)" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudEnumSelect TEnum="UnitDto" Label="@Model.GetDisplayName(x=>x.Unit)"
+                                    @bind-Value="Model.Unit" For="@(() => Model.Unit)"></MudEnumSelect>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudNumericField Label="@Model.GetDisplayName(x=>x.Price)"
+                                     @bind-Value="Model.Price" For="@(() => Model.Price)" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudEnumSelect TEnum="Nullable<CurrencyDto>" Label="@Model.GetDisplayName(x=>x.Currency)"
+                                   @bind-Value="Model.Currency" For="@(() => Model.Currency)"
+                                  >
+                    </MudEnumSelect>
+                </MudItem>
+            </MudGrid>
+            <MudStack Row AlignItems="AlignItems.End" Justify="Justify.FlexEnd" Class="my-5">
+                <MudButton ButtonType="ButtonType.Submit" >@L["Save"]</MudButton>
+            </MudStack>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code
+{
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public ProductDto Model { get; set; } = new();
+    private void HandleValidSubmit()
+    {
+        if (ValidatePriceAndCurrency())
+        {
+            MudDialog.Close(DialogResult.Ok(Model));
+        }
+    }
+    private bool ValidatePriceAndCurrency()
+    {
+        if (Model?.Price.HasValue == true && Model?.Currency.HasValue == false)
+        {
+            Snackbar.Add(L["Currency must be set if Price is set."], Severity.Error);
+            return false;
+        }
+        return true;
+    }
+}
